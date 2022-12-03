@@ -4,8 +4,21 @@ output: github_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
+library(viridis)
+
+knitr::opts_chunk$set(
+  fig.width = 6,
+  fig.asp = .6,
+  out.width = "90%"
+)
+theme_set(theme_minimal() + theme(legend.position = "bottom"))
+options(
+  ggplot2.continuous.colour = "viridis",
+  ggplot2.continuous.fill = "viridis"
+)
+scale_colour_discrete = scale_color_viridis_d
+scale_fill_discrete = scale_fill_viridis_d
 ```
 
 ## Problem 2
@@ -41,3 +54,23 @@ baltimore_model %>%
   knitr::kable(digits = 3)
 ```
 Keeping all other variables fixed, the estimate of odds ratio for solving homicides comparing male victims to female victims is 0.426 with a 95% confidence interval from 0.325 to 0.558, indicating that solved male-victim homicide cases is 0.426 as solved female victim cases. 
+
+```{r}
+all_cities = 
+  homicide %>% 
+  group_by(city_state) %>% 
+  nest() 
+
+all_cities %>% 
+  mutate(models = map(data, ~glm(ifsolved ~ victim_age + victim_sex + victim_race, data = .x, family = binomial())), 
+         models = map(models, broom::tidy)) %>% 
+  select(-data) %>% 
+  unnest() %>% 
+  filter(term == "victim_sexMale") %>% 
+  mutate(OR = exp(estimate), 
+         lower_bound = exp(estimate - std.error * 1.96), 
+         upper_bound = exp(estimate + std.error * 1.96)) %>% 
+  select(city_state, term, OR, lower_bound, upper_bound) %>% 
+  mutate(city_state = fct_reorder(city_state, OR)) 
+```
+
