@@ -7,6 +7,7 @@ output: github_document
 library(tidyverse) 
 library(viridis) 
 library(modelr) 
+library(purrr)
 
 knitr::opts_chunk$set(
   fig.width = 6,
@@ -111,5 +112,25 @@ birthweight %>%
   geom_point(alpha = 0.2) + 
   geom_smooth(se = F, method = "lm") + 
   labs(x = "Predictions", y = "Residuals") 
+```
+
+Compare my model to two others:
+```{r}
+birthweight_cv =
+    crossv_mc(birthweight, 100) %>% 
+    mutate(train = map(train, as_tibble),
+           test = map(test, as_tibble)) 
+
+birthweight_cv = 
+  birthweight_cv  %>% 
+  mutate(
+    model1 = map(train, ~lm(bwt ~ gaweeks + mrace + malform + pnumlbw + ppbmi, data = .x)), 
+    model2 = map(train, ~lm(bwt ~ blength + gaweeks, data = .x)), 
+    model3 = map(train, ~lm(bwt ~ bhead + blength + babysex + bhead * blength + bhead * babysex + blength * babysex + bhead * blength * babysex, data = .x))) %>% 
+  mutate(
+    rmse1 = map2_dbl(model1, test, ~rmse(model = .x, data = .y)), 
+    rmse2 = map2_dbl(model2, test, ~rmse(model = .x, data = .y)), 
+    rmse3 = map2_dbl(model3, test, ~rmse(model = .x, data = .y))
+    ) 
 ```
 
