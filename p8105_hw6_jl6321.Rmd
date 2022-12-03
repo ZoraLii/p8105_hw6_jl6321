@@ -116,21 +116,21 @@ birthweight %>%
 
 Compare my model to two others:
 ```{r}
-birthweight_cv =
-    crossv_mc(birthweight, 100) %>% 
-    mutate(train = map(train, as_tibble),
-           test = map(test, as_tibble)) 
-
 birthweight_cv = 
-  birthweight_cv  %>% 
-  mutate(
-    model1 = map(train, ~lm(bwt ~ gaweeks + mrace + malform + pnumlbw + ppbmi, data = .x)), 
-    model2 = map(train, ~lm(bwt ~ blength + gaweeks, data = .x)), 
-    model3 = map(train, ~lm(bwt ~ bhead + blength + babysex + bhead * blength + bhead * babysex + blength * babysex + bhead * blength * babysex, data = .x))) %>% 
-  mutate(
-    rmse1 = map2_dbl(model1, test, ~rmse(model = .x, data = .y)), 
-    rmse2 = map2_dbl(model2, test, ~rmse(model = .x, data = .y)), 
-    rmse3 = map2_dbl(model3, test, ~rmse(model = .x, data = .y))
-    ) 
+  crossv_mc(birthweight, 100) %>% 
+  mutate(train = map(train, as_tibble), 
+         test = map(test, as_tibble)) %>% 
+  mutate(model1 = map(train, ~lm(bwt ~ gaweeks + mrace + malform + pnumlbw + ppbmi, data = .x)), 
+         model2 = map(train, ~lm(bwt ~ blength + gaweeks, data = .x)), 
+         model3 = map(train, ~lm(bwt ~ bhead + blength + babysex + bhead * blength + bhead * babysex + blength * babysex + bhead * blength * babysex, data = .x))) %>% 
+  mutate(rmse1 = map2_dbl(model1, test, ~rmse(model = .x, data = .y)), 
+         rmse2 = map2_dbl(model2, test, ~rmse(model = .x, data = .y)), 
+         rmse3 = map2_dbl(model3, test, ~rmse(model = .x, data = .y))) 
+
+birthweight_cv %>% 
+  select(starts_with("rmse")) %>% 
+  pivot_longer(everything(), names_to = "model", values_to = "rmse", names_prefix = "rmse_") %>% 
+  mutate(model = fct_inorder(model)) %>% 
+  ggplot(aes(x = model, y = rmse)) + geom_violin() 
 ```
 
