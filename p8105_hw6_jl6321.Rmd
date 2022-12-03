@@ -8,6 +8,9 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 ```
 
+## Problem 2
+
+Read in and manipulate the data: 
 ```{r}
 homicide = read_csv("./data/homicide-data.csv") %>% 
   unite(col = "city_state", city:state, sep = ", ", remove = FALSE) %>% 
@@ -15,5 +18,17 @@ homicide = read_csv("./data/homicide-data.csv") %>%
          victim_age = as.numeric(victim_age)) %>% 
   filter(!(city_state %in% c("Dallas, TX", "Phoenix, AZ", "Kansas City, MO", "Tulsa, AL"))) %>% 
   filter(victim_race %in% c("White", "Black")) 
+```
+
+
+```{r}
+baltimore = 
+  homicide %>% 
+  filter(city_state == "Baltimore, MD") 
+
+baltimore_model = 
+  baltimore %>% 
+  glm(ifsolved ~ victim_age + victim_sex + victim_race, data = ., family = binomial())
+
 ```
 
