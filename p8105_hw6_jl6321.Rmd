@@ -81,3 +81,23 @@ all_cities %>%
   theme(plot.title = element_text(hjust = 0.5)) 
 ```
 
+## Problem 3 
+
+Load and clean the data for regression analysis: 
+```{r}
+birthweight = read_csv("data/birthweight.csv") %>% 
+  mutate(babysex = as.factor(babysex),
+         frace = as.factor(frace), 
+         malform = as.factor(malform), 
+         mrace = as.factor(mrace)
+         ) 
+
+sum(!complete.cases(birthweight))
+```
+There is no missing data. 
+
+
+```{r}
+
+```
+
