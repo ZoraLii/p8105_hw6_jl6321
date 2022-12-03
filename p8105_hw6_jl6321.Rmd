@@ -11,7 +11,9 @@ library(tidyverse)
 ```{r}
 homicide = read_csv("./data/homicide-data.csv") %>% 
   unite(col = "city_state", city:state, sep = ", ", remove = FALSE) %>% 
-  mutate(ifsolved = ifelse(disposition == "Closed by arrest", 1, 0)) %>% 
-  filter(!(city_state %in% c("Dallas, TX", "Phoenix, AZ", "Kansas City, MO", "Tulsa, AL"))) 
+  mutate(ifsolved = ifelse(disposition == "Closed by arrest", 1, 0), 
+         victim_age = as.numeric(victim_age)) %>% 
+  filter(!(city_state %in% c("Dallas, TX", "Phoenix, AZ", "Kansas City, MO", "Tulsa, AL"))) %>% 
+  filter(victim_race %in% c("White", "Black")) 
 ```
 
