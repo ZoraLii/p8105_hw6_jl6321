@@ -4,8 +4,9 @@ output: github_document
 ---
 
 ```{r setup, include=FALSE}
-library(tidyverse)
-library(viridis)
+library(tidyverse) 
+library(viridis) 
+library(modelr) 
 
 knitr::opts_chunk$set(
   fig.width = 6,
@@ -103,6 +104,12 @@ model1 %>%
   broom::tidy() %>% 
   select(term, estimate, p.value) %>% 
   knitr::kable(digits = 3) 
-
+birthweight %>% 
+  add_predictions(model = model1, var = "predictions") %>% 
+  add_residuals(model = model1, var = "residuals") %>% 
+  ggplot(aes(x = predictions, y = residuals)) + 
+  geom_point(alpha = 0.2) + 
+  geom_smooth(se = F, method = "lm") + 
+  labs(x = "Predictions", y = "Residuals") 
 ```
 
